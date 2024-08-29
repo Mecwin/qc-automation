@@ -11,6 +11,11 @@ import {
 } from "sequelize";
 import Distributor from "../distributor/model";
 import sequelize from "../database";
+import { MOTOR_HP, SIM_OPERATORS } from "../utils/constants";
+import { INTEGER } from "sequelize";
+import { DOUBLE } from "sequelize";
+import { string } from "joi";
+import { BOOLEAN } from "sequelize";
 
 export class QC extends Model<
   InferAttributes<QC>,
@@ -19,14 +24,14 @@ export class QC extends Model<
   declare id: CreationOptional<string>;
   declare imeiNo: CreationOptional<string>;
   declare distributorId: ForeignKey<Distributor>;
-  declare order: CreationOptional<string>;
+  // declare order: CreationOptional<string>;
   declare simPhoneNumber: CreationOptional<string>;
   declare simNumber: CreationOptional<string>;
   declare simOperator: CreationOptional<string>;
-  declare controllerRequirement: CreationOptional<string>;
+  declare controllerRequirement: CreationOptional<boolean>;
   declare headSize: CreationOptional<string>;
   declare controllerBoxType: CreationOptional<string>;
-  declare rmsRequirement: CreationOptional<string>;
+  declare rmsRequirement: CreationOptional<boolean>;
   declare state: CreationOptional<string>;
   declare controllerBoxColor: CreationOptional<string>;
   declare pumpType: CreationOptional<string>;
@@ -38,6 +43,8 @@ export class QC extends Model<
   declare motorSize: CreationOptional<string>;
   declare controllerSerialNumber: CreationOptional<string>;
   declare rmsDeviceId: CreationOptional<string>;
+  declare motorCategory: CreationOptional<string>;
+  declare networkType: CreationOptional<string>;
   declare createdAt: CreationOptional<Date>;
 
   declare updatedAt: CreationOptional<Date>;
@@ -59,9 +66,9 @@ const qc_Schema = {
       as: "distributorId",
     },
   },
-  order: {
-    type: STRING,
-  },
+  // order: {
+  //   type: STRING,
+  // },
   simPhoneNumber: {
     type: STRING,
   },
@@ -70,18 +77,21 @@ const qc_Schema = {
   },
   simOperator: {
     type: STRING,
+    valiate: {
+      isIn: [SIM_OPERATORS],
+    },
   },
   controllerRequirement: {
-    type: STRING,
+    type: BOOLEAN,
   },
   headSize: {
-    type: STRING,
+    type: INTEGER,
   },
   controllerBoxType: {
     type: STRING,
   },
   rmsRequirement: {
-    type: STRING,
+    type: BOOLEAN,
   },
   state: {
     type: STRING,
@@ -96,7 +106,10 @@ const qc_Schema = {
     type: STRING,
   },
   motorHp: {
-    type: STRING,
+    type: DOUBLE,
+    validate: {
+      isIn: [MOTOR_HP],
+    },
   },
   motorType: {
     type: STRING,
@@ -114,6 +127,12 @@ const qc_Schema = {
     type: STRING,
   },
   rmsDeviceId: {
+    type: STRING,
+  },
+  motorCategory: {
+    type: STRING,
+  },
+  networkType: {
     type: STRING,
   },
   createdAt: {

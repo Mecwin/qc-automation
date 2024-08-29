@@ -85,3 +85,30 @@ export const MIME_TYPES_TICKETS = {
   jpeg: "image/jpeg",
   png: "image/png",
 };
+
+export const SIM_OPERATORS = {
+  airtel: "AIRTEL",
+  vodaphone: "VODAPHONE",
+  bsnl: "BSNL",
+  joi: "JIO",
+  idea: "IDEA",
+};
+
+export const NETWORK_TYPE = {
+  "2g": "2G",
+  "4g": "4G",
+};
+
+export enum MODEL_NUMBER {
+  "1hp" = "900Wp",
+  "2hp" = "1800Wp",
+  "3hp" = "3000Wp",
+  "5hp" = "4800Wp",
+  "7.5hp" = "6750Wp",
+  "10hp" = "9000Wp",
+}
+
+export const ORDER_STATUS = {
+  ongoing: "ONGOIN",
+  completed: "COMPLETED",
+};

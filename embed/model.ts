@@ -68,7 +68,7 @@ const embedSchema = {
 
 Embed.init(embedSchema, {
   sequelize,
-  modelName: "Embed",
-  tableName: "embed",
+  modelName: "qc",
+  tableName: "qc",
   timestamps: true,
 });

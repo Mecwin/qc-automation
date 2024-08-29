@@ -1,5 +1,6 @@
 import {
   CreationOptional,
+  DataTypes,
   DATE,
   InferAttributes,
   InferCreationAttributes,
@@ -10,6 +11,8 @@ import {
   UUIDV4,
 } from "sequelize";
 import sequelize from "../database";
+import { BOOLEAN } from "sequelize";
+import { ORDER_STATUS } from "../utils/constants";
 
 export class Order extends Model<
   InferAttributes<Order>,
@@ -18,6 +21,7 @@ export class Order extends Model<
   declare id: CreationOptional<string>;
   declare orderNumber: CreationOptional<string>;
   declare count: CreationOptional<number>;
+  declare status: CreationOptional<string>;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
 }
@@ -25,12 +29,16 @@ export class Order extends Model<
 const orderSchema = {
   id: {
     type: UUID,
-    defaultValues: UUIDV4,
+    defaultValue: UUIDV4,
     primaryKey: true,
   },
   orderNumber: {
     type: STRING,
     allowNull: false,
+  },
+  status: {
+    type: STRING,
+    isIn: [Object.values(ORDER_STATUS)],
   },
   count: {
     type: NUMBER,
