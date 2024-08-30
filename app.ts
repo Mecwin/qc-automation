@@ -6,11 +6,17 @@ import APIError from "./utils/api-error";
 import embed from "./embed/router";
 import qc from "./qc/router";
 import order from "./order/router";
+import user from "./users/router";
+import { authorizeUser } from "./utils/authentication";
+import cors from "cors";
 let app = express();
 app.use(morgan("common"));
+app.use(cors());
 
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: true }));
+app.use("/user", user);
+app.use(authorizeUser);
 app.use("/autogenerateValue", autogenerateValue);
 app.use("/qc", qc);
 app.use("/embed", embed);

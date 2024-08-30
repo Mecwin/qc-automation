@@ -1,7 +1,9 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import { getAllOrderDetails, registerOrder } from "./module";
+import { ensureEmbed } from "../utils/authentication";
 const route = Router();
+route.use(ensureEmbed);
 
 route.post(
   "/register-order",

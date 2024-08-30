@@ -6,9 +6,6 @@ config({
 });
 import { SequelizeStorage, Umzug } from "umzug";
 
-import express from "express";
-import Distributor from "./distributor/model";
-import { Embed } from "./embed/model";
 const db_name = process.env.DB_name as string;
 const db_user = process.env.DB_user as string;
 const db_pass = process.env.DB_pass as string;

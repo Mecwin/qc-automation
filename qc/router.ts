@@ -1,7 +1,9 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import { addRmsDetails, getRmsDetails } from "./module";
+import { ensureQC } from "../utils/authentication";
 const route = Router();
+route.use(ensureQC);
 
 route.post(
   "/add-rms-details",

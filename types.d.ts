@@ -35,3 +35,15 @@ export type OrderDetails = {
   count: number;
   status?: string;
 };
+
+export type login = {
+  username: string;
+  passward: string;
+};
+
+export type userType = {
+  username: string;
+  id: string;
+  role: string;
+  name?: string;
+};

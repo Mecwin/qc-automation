@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { STATUS_CODES } from "http";
 import { StatusCodes } from "http-status-codes";
-import { autogenerate, registerHP } from "./module";
+import { autogenerate, getDistributor, registerHP } from "./module";
 const route = Router();
 
 route.post(
@@ -27,6 +27,21 @@ route.get(
         .send(await autogenerate(motorHp, headSize, motorCategory, options));
     } catch (error) {
       next(error);
+    }
+  }
+);
+
+route.get(
+  "/distributor",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { page = 1, pageSize = 10, search = "" } = req.query as any;
+
+      res
+        .status(StatusCodes.OK)
+        .send(await getDistributor(Number(page), Number(pageSize), search));
+    } catch (err) {
+      next(err);
     }
   }
 );

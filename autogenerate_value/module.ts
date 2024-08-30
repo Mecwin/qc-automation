@@ -3,6 +3,10 @@ import { registerHP, rmsDetails } from "../types";
 import APIError from "../utils/api-error";
 import { Autogenerate_Value } from "./model";
 import { registerHPValidation } from "./validation";
+import Distributor from "../distributor/model";
+import sequelize from "sequelize";
+import { User } from "../users/model";
+import Consumer from "../consumer/model";
 
 export async function registerHP(data: registerHP) {
   try {
@@ -90,5 +94,70 @@ export async function autogenerate(
       );
   } catch (error) {
     throw new APIError((error as APIError).message, (error as APIError).code);
+  }
+}
+
+export async function getDistributor(
+  page: number,
+  pageSize: number,
+  search: string
+) {
+  try {
+    const limit = pageSize;
+    const offset = (page - 1) * pageSize;
+    const data = await Distributor.findAll({
+      attributes: [
+        "id",
+        "businessName",
+        "businessGST",
+        "address",
+        "state",
+        "firstName",
+        "createdAt",
+        [
+          sequelize.literal(
+            '(SELECT COUNT(*) FROM consumer WHERE consumer."distributorId" = Distributor.id AND consumer."userId" IN (SELECT id FROM "users" WHERE "isActive" = true AND "userRole" = \'CONSUMER\'))'
+          ),
+          "activeConsumerCount",
+        ],
+        [
+          sequelize.literal(
+            '(SELECT COUNT(*) FROM consumer WHERE consumer."distributorId" = Distributor.id AND consumer."userId" IN (SELECT id FROM "users" WHERE "isActive" = false AND "userRole" = \'CONSUMER\'))'
+          ),
+          "inActiveConsumerCount",
+        ],
+      ],
+
+      include: [
+        {
+          model: Consumer,
+          as: "consumer",
+          attributes: [],
+          include: [
+            {
+              model: User,
+              as: "user",
+            },
+          ],
+        },
+        {
+          model: User,
+          as: "user",
+          attributes: ["isActive"],
+          where: { isActive: true },
+        },
+      ],
+      where: {
+        businessName: { [Op.like]: `%${search}%` },
+      },
+      order: [["createdAt", "DESC"]],
+
+      offset,
+      limit,
+    });
+
+    return data;
+  } catch (e) {
+    throw new APIError((e as APIError).message, (e as APIError).code);
   }
 }

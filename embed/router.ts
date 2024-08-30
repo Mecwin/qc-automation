@@ -2,7 +2,9 @@ import { NextFunction, Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import { embedAddRmsDetais, generateRmsDeviceId } from "./module";
 import { updateOrderDetails } from "../order/module";
+import { ensureEmbed } from "../utils/authentication";
 const route = Router();
+route.use(ensureEmbed);
 
 route.post(
   "/emded-add-rmsDetails",
