@@ -1,5 +1,10 @@
 import app from "./app";
 import { connectToDataBase } from "./database";
+import { config } from "dotenv";
+import { join } from "path";
+config({
+  path: join(__dirname, ".env", "local.env"),
+});
 connectToDataBase()
   .then((res) => {
     if (res) {
@@ -9,8 +14,8 @@ connectToDataBase()
   })
   .then((res) => {
     if (res) {
-      app.listen(1000, () => {
-        console.log("server  is  running on port 1000");
+      app.listen(process.env.port, () => {
+        console.log(`server  is  running on port ${process.env.port}`);
       });
     }
   })
