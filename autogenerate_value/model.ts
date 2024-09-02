@@ -69,7 +69,7 @@ const autogenerate_Value_Schema = {
   motorCategory: {
     type: STRING,
     validate: {
-      isIn: [Object.keys(MOTOR_CATEGORY)],
+      isIn: [Object.values(MOTOR_CATEGORY)],
     },
   },
 };

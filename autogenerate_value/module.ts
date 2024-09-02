@@ -21,9 +21,9 @@ export async function registerHP(data: registerHP) {
     } = validatedData;
     const autogenVal = await Autogenerate_Value.findOne({
       where: {
+        headSize,
+        motorHp,
         [Op.or]: [
-          { headSize },
-          { motorHp },
           { rmsDeviceId },
           { motorSerialNumber },
           { controllerSerialNumber },

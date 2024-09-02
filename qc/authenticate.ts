@@ -28,13 +28,10 @@ export const rmsDetailsAuth = Joi.object({
     "any.required": "headSize is required , cant be empty",
     "number.base": "headSize should be number ",
   }),
-  motorCategory: Joi.string()
-    .optional()
-    .valid(...Object.values(MOTOR_CATEGORY))
-    .messages({
-      "any.required": "motorCategory is required , cant be empty",
-      "string.base": "motorCategory should be string",
-    }),
+  motorCategory: Joi.string().optional().messages({
+    "any.required": "motorCategory is required , cant be empty",
+    "string.base": "motorCategory should be string",
+  }),
   state: Joi.string().required().messages({
     "any.required": "state is required , cant be empty",
   }),
@@ -62,9 +59,9 @@ export const rmsDetailsAuth = Joi.object({
   motorSize: Joi.string().optional().messages({
     "string.base": "controllerBoxType should be string",
   }),
-  imeiNo: Joi.string().length(12).optional().messages({
+  imeiNo: Joi.string().length(15).optional().messages({
     "string.base": "imeiNo should be string",
-    "string.length": "imeiNo should be 12 digits",
+    "string.length": "imeiNo should be 15 digits",
   }),
   distributorId: Joi.string().required().messages({
     "string.base": "controllerBoxType should be string",

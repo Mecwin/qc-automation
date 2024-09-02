@@ -13,6 +13,7 @@ import {
 
 import { User } from "../users/model";
 import sequelize from "../database";
+import { QC } from "../qc/model";
 
 const distributorSchema = {
   id: {

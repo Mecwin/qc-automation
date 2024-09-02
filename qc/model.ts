@@ -16,6 +16,7 @@ import { INTEGER } from "sequelize";
 import { DOUBLE } from "sequelize";
 import { string } from "joi";
 import { BOOLEAN } from "sequelize";
+import { Order } from "../order/model";
 
 export class QC extends Model<
   InferAttributes<QC>,
@@ -24,7 +25,7 @@ export class QC extends Model<
   declare id: CreationOptional<string>;
   declare imeiNo: CreationOptional<string>;
   declare distributorId: ForeignKey<Distributor>;
-  // declare order: CreationOptional<string>;
+  declare orderId: CreationOptional<string>;
   declare simPhoneNumber: CreationOptional<string>;
   declare simNumber: CreationOptional<string>;
   declare simOperator: CreationOptional<string>;
@@ -66,9 +67,13 @@ const qc_Schema = {
       as: "distributorId",
     },
   },
-  // order: {
-  //   type: STRING,
-  // },
+  orderId: {
+    type: UUID,
+    references: {
+      model: Order,
+      as: "orderId",
+    },
+  },
   simPhoneNumber: {
     type: STRING,
   },
@@ -144,3 +149,9 @@ const qc_Schema = {
 };
 
 QC.init(qc_Schema, { sequelize, tableName: "qc", modelName: "QC" });
+
+QC.hasOne(Distributor, {
+  foreignKey: "id",
+  sourceKey: "distributorId",
+  as: "distributor",
+});
