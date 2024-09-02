@@ -66,10 +66,10 @@ export async function autogenerate(
       if (options.toLocaleLowerCase() == "controllerserialnumber") {
         const conSerialNum = dataFromDb?.controllerSerialNumber.slice(
           0,
-          18
+          15
         ) as string;
         const conSerialNumCount = Number(
-          dataFromDb?.controllerSerialNumber.split("-")[3]
+          dataFromDb?.controllerSerialNumber.split("M")[1]
         );
 
         dataFromDb!.controllerSerialNumber =
@@ -77,13 +77,28 @@ export async function autogenerate(
         console.log(conSerialNum, conSerialNumCount);
         return dataFromDb?.controllerSerialNumber;
       } else if (options.toLocaleLowerCase() == "motorserialnumber") {
-        let [firstHalf, secondHalf] = dataFromDb?.motorSerialNumber.split(
-          "-"
-        ) as string[];
-        secondHalf = Number(secondHalf) + 1 + "";
-        firstHalf = firstHalf.slice(0, 7) + new Date().getFullYear();
-        dataFromDb!.motorSerialNumber = firstHalf + "-" + secondHalf;
-        return dataFromDb?.motorSerialNumber;
+        // let [firstHalf, secondHalf] = dataFromDb?.motorSerialNumber.split(
+        //   "-"
+        // ) as string[];
+        // secondHalf = Number(secondHalf) + 1 + "";
+        // const date = new Date();
+        // const month = date.getMonth() + "".padStart(2, "0");
+        // console.log(month, date.getFullYear());
+        // firstHalf = firstHalf.slice(0, 7) + date.getFullYear();
+        // dataFromDb!.motorSerialNumber = firstHalf + "-" + secondHalf;
+        // return dataFromDb?.motorSerialNumber;
+
+        let firstHalf = dataFromDb?.motorSerialNumber.slice(0, 7);
+        const date = new Date();
+        const month = `${date.getMonth()}`.padStart(2, "0");
+        const year = date.getFullYear();
+
+        firstHalf = firstHalf + month + year;
+
+        let secondHalf = Number(dataFromDb?.motorSerialNumber.slice(13));
+
+        secondHalf = secondHalf + 1;
+        return (dataFromDb!.motorSerialNumber = firstHalf + secondHalf);
       } else if (options.toLocaleLowerCase() == "modelnumber") {
         return dataFromDb?.modelNumber;
       }
