@@ -25,7 +25,7 @@ export const embedAddRmsDetaisValidation = Joi.object({
     "string.base": "networkType should be  string format",
     "any.required": "networkType is required filed",
   }),
-  rmsDeviceId: Joi.string().required().messages({
+  rmsDeviceId: Joi.string().optional().messages({
     "string.base": "rmsDeviceId should be  string format",
     "any.required": "rmsDeviceId is required filed",
   }),

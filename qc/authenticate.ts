@@ -20,7 +20,7 @@ export const rmsDetailsAuth = Joi.object({
     "any.required": "controllerSerialNumber is required , cant be empty",
     "string.base": "controllerSerialNumber should be string",
   }),
-  rmsDeviceId: Joi.string().required().messages({
+  rmsDeviceId: Joi.string().optional().messages({
     "any.required": "rmsDeviceId is required , cant be empty",
     "string.base": "rmsDeviceId should be string",
   }),

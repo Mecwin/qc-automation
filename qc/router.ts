@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
-import { addRmsDetails, getRmsDetails } from "./module";
+import { addRmsDetails, downloadQcDetails, getRmsDetails } from "./module";
 import { ensureQC } from "../utils/authentication";
 const route = Router();
 route.use(ensureQC);
@@ -28,4 +28,18 @@ route.get(
   }
 );
 
+route.get(
+  "/download-qc-details",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { options, startDate, endDate } = req.query as any;
+
+      res
+        .status(StatusCodes.OK)
+        .send(await downloadQcDetails(options, startDate, endDate));
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 export default route;

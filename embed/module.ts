@@ -25,7 +25,7 @@ export async function embedAddRmsDetais(embedRmsDetails: embedRmsDetails) {
 
     const QcFromDb = await QC.findOne({
       where: {
-        [Op.or]: [{ imeiNo }, { rmsDeviceId }],
+        [Op.or]: [{ imeiNo }],
       },
     });
 
