@@ -47,3 +47,5 @@ export type userType = {
   role: string;
   name?: string;
 };
+
+export type product_set = "PMC" | "C" | "PM" | "M";

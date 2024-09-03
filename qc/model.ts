@@ -45,9 +45,10 @@ export class QC extends Model<
   declare controllerSerialNumber: CreationOptional<string>;
   declare rmsDeviceId: CreationOptional<string>;
   declare motorCategory: CreationOptional<string>;
+  declare isUpdated: CreationOptional<boolean>;
   declare networkType: CreationOptional<string>;
   declare createdAt: CreationOptional<Date>;
-
+  declare product_set: CreationOptional<string>;
   declare updatedAt: CreationOptional<Date>;
 }
 
@@ -138,6 +139,13 @@ const qc_Schema = {
     type: STRING,
   },
   networkType: {
+    type: STRING,
+  },
+  isUpdated: {
+    type: BOOLEAN,
+    defaultValue: false,
+  },
+  product_set: {
     type: STRING,
   },
   createdAt: {

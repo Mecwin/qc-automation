@@ -10,7 +10,8 @@ route.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const data = req.body as any;
-      res.status(StatusCodes.OK).send(await addRmsDetails(data));
+      const { options } = req.query as any;
+      res.status(StatusCodes.OK).send(await addRmsDetails(data, options));
     } catch (error) {
       next(error);
     }

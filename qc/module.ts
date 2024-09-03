@@ -1,5 +1,5 @@
 import { Op } from "sequelize";
-import { rmsDetails } from "../types";
+import { rmsDetails, product_set } from "../types";
 import APIError from "../utils/api-error";
 import { QC } from "./model";
 import { rmsDetailsAuth } from "./authenticate";
@@ -7,129 +7,151 @@ import { Autogenerate_Value } from "../autogenerate_value/model";
 import { Order } from "../order/model";
 import Distributor from "../distributor/model";
 
-export async function addRmsDetails(rmsDetails: rmsDetails) {
+export async function addRmsDetails(
+  rmsDetails: rmsDetails,
+  options: product_set
+) {
   try {
-    const validatedData = await rmsDetailsAuth.validateAsync(rmsDetails);
-    const {
-      motorSerialNumber,
-      motorHp,
-      modelNumber,
-      controllerSerialNumber,
-      rmsDeviceId,
-      headSize,
-      motorCategory,
-      orderId,
-    } = validatedData;
-
-    // const whereClause: any = {};
-    const arrClause: any = [];
-    if (motorSerialNumber) {
-      // whereClause.motorSerialNumber = motorSerialNumber;
-      arrClause.push({
+    if (
+      options == "PMC" ||
+      options == "C" ||
+      options == "PM" ||
+      options == "M"
+    ) {
+      const validatedData = await rmsDetailsAuth.validateAsync(rmsDetails);
+      const {
         motorSerialNumber,
-      });
-    }
-    if (controllerSerialNumber) {
-      // whereClause.controllerSerialNumber = controllerSerialNumber;
-      arrClause.push({
+        motorHp,
+        modelNumber,
         controllerSerialNumber,
-      });
-    }
-    const QcFromDb = await QC.findOne({
-      where: {
-        [Op.or]: arrClause,
-      },
-    });
+        rmsDeviceId,
+        headSize,
+        motorCategory,
+        orderId,
+      } = validatedData;
 
-    if (QcFromDb) {
-      throw new APIError("duplicate properties ", "DUPLICATE INPUTS");
-    }
-
-    let createdData;
-
-    if (validatedData.imeiNo) {
-      const dataFromDb = await QC.findOne({
+      // const whereClause: any = {};
+      const arrClause: any = [];
+      if (motorSerialNumber) {
+        // whereClause.motorSerialNumber = motorSerialNumber;
+        arrClause.push({
+          motorSerialNumber,
+        });
+      }
+      if (controllerSerialNumber) {
+        // whereClause.controllerSerialNumber = controllerSerialNumber;
+        arrClause.push({
+          controllerSerialNumber,
+        });
+      }
+      const QcFromDb = await QC.findOne({
         where: {
-          [Op.or]: [{ imeiNo: validatedData.imeiNo }],
+          [Op.or]: arrClause,
         },
       });
-      if (!dataFromDb) {
-        throw new APIError("invalid imei ", "  INVALID IMEI ");
+
+      if (QcFromDb) {
+        throw new APIError("duplicate properties ", "DUPLICATE INPUTS");
       }
 
-      dataFromDb.controllerSerialNumber = validatedData.controllerSerialNumber;
-      dataFromDb.motorSerialNumber = validatedData.motorSerialNumber;
-      dataFromDb.rmsDeviceId = validatedData.rmsDeviceId;
-      dataFromDb.modelNumber = validatedData.modelNumber;
-      dataFromDb.distributorId = validatedData.distributorId;
+      let createdData;
 
-      dataFromDb.simOperator = validatedData.simOperator;
+      if (validatedData.imeiNo) {
+        const dataFromDb = await QC.findOne({
+          where: {
+            [Op.or]: [{ imeiNo: validatedData.imeiNo }],
+          },
+        });
+        if (!dataFromDb) {
+          throw new APIError("invalid imei ", "  INVALID IMEI ");
+        } else if (dataFromDb.isUpdated != false) {
+          throw new APIError(
+            "this IMEI is already updated ",
+            " ALREADY UPDATED"
+          );
+        }
 
-      dataFromDb.controllerRequirement = validatedData.controllerRequirement;
+        dataFromDb.controllerSerialNumber =
+          validatedData.controllerSerialNumber;
+        dataFromDb.motorSerialNumber = validatedData.motorSerialNumber;
+        dataFromDb.rmsDeviceId = validatedData.rmsDeviceId;
+        dataFromDb.modelNumber = validatedData.modelNumber;
+        dataFromDb.distributorId = validatedData.distributorId;
 
-      dataFromDb.headSize = validatedData.headSize;
+        dataFromDb.simOperator = validatedData.simOperator;
 
-      dataFromDb.controllerBoxType = validatedData.controllerBoxType;
+        dataFromDb.controllerRequirement = validatedData.controllerRequirement;
 
-      dataFromDb.rmsRequirement = validatedData.rmsRequirement;
+        dataFromDb.headSize = validatedData.headSize;
 
-      dataFromDb.state = validatedData.state;
+        dataFromDb.controllerBoxType = validatedData.controllerBoxType;
 
-      dataFromDb.controllerBoxColor = validatedData.controllerBoxColor;
+        dataFromDb.rmsRequirement = validatedData.rmsRequirement;
 
-      dataFromDb.pumpType = validatedData.pumpType;
+        dataFromDb.state = validatedData.state;
 
-      dataFromDb.motorHp = validatedData.motorHp;
+        dataFromDb.controllerBoxColor = validatedData.controllerBoxColor;
 
-      dataFromDb.motorType = validatedData.motorType;
+        dataFromDb.pumpType = validatedData.pumpType;
 
-      dataFromDb.nodalAgency = validatedData.nodalAgency;
+        dataFromDb.motorHp = validatedData.motorHp;
 
-      dataFromDb.motorSize = validatedData.motorSize;
+        dataFromDb.motorType = validatedData.motorType;
 
-      dataFromDb.simNumber = validatedData.simNumber;
+        dataFromDb.nodalAgency = validatedData.nodalAgency;
 
-      dataFromDb.simPhoneNumber = validatedData.simPhoneNumber;
+        dataFromDb.motorSize = validatedData.motorSize;
 
-      dataFromDb.motorCategory = validatedData.motorCategory;
+        dataFromDb.simNumber = validatedData.simNumber;
 
-      dataFromDb.networkType = validatedData.networkType;
-      dataFromDb.orderId = validatedData.orderId;
+        dataFromDb.simPhoneNumber = validatedData.simPhoneNumber;
 
-      createdData = await dataFromDb.save(validatedData);
+        dataFromDb.motorCategory = validatedData.motorCategory;
+
+        dataFromDb.networkType = validatedData.networkType;
+        dataFromDb.orderId = validatedData.orderId;
+        dataFromDb.isUpdated = true;
+        dataFromDb.product_set = options;
+
+        createdData = await dataFromDb.save(validatedData);
+      } else {
+        validatedData.product_set = options;
+        createdData = await QC.create(validatedData);
+      }
+      const autogenerate_Value_fromDB = await Autogenerate_Value.findOne({
+        where: {
+          motorHp,
+          headSize,
+          motorCategory: motorCategory || "AC",
+        },
+      });
+
+      autogenerate_Value_fromDB!.motorSerialNumber = motorSerialNumber;
+
+      autogenerate_Value_fromDB!.controllerSerialNumber =
+        controllerSerialNumber;
+      await autogenerate_Value_fromDB?.save();
+
+      const order = await Order.findOne({
+        where: {
+          id: orderId,
+        },
+      });
+
+      console.log(order?.count, " is the count ");
+      order!.count = order!.count - 1;
+      console.log(order?.count, " has been changed ");
+      await order?.save();
+
+      return {
+        message: "Successfully created RMS Details",
+        data: {
+          createdData,
+        },
+      };
     } else {
-      createdData = await QC.create(validatedData);
+      throw new APIError("give correct option", " INVALID OPTIONS");
     }
-    const autogenerate_Value_fromDB = await Autogenerate_Value.findOne({
-      where: {
-        motorHp,
-        headSize,
-        motorCategory: motorCategory || "AC",
-      },
-    });
-
-    autogenerate_Value_fromDB!.motorSerialNumber = motorSerialNumber;
-
-    autogenerate_Value_fromDB!.controllerSerialNumber = controllerSerialNumber;
-    await autogenerate_Value_fromDB?.save();
-
-    const order = await Order.findOne({
-      where: {
-        id: orderId,
-      },
-    });
-
-    console.log(order?.count, " is the count ");
-    order!.count = order!.count - 1;
-    console.log(order?.count, " has been changed ");
-    await order?.save();
-
-    return {
-      message: "Successfully created RMS Details",
-      data: {
-        createdData,
-      },
-    };
   } catch (error) {
     throw new APIError((error as APIError).message, (error as APIError).code);
   }
@@ -168,48 +190,53 @@ export async function downloadQcDetails(
     startDate = new Date(startDate.setHours(0, 0, 0, 1));
     endDate = new Date(endDate.setHours(23, 59, 59, 59));
 
-    if (options.toLowerCase() == "pmc") {
-      const responseData = await QC.findAll({
-        where: {
-          createdAt: {
-            [Op.gte]: startDate,
-            [Op.lte]: endDate,
+    if (options) {
+      if (options.toLowerCase() == "pmc") {
+        const responseData = await QC.findAll({
+          where: {
+            createdAt: {
+              [Op.gte]: startDate,
+              [Op.lte]: endDate,
+            },
+            product_set: "PMC",
           },
-        },
-      });
-      return responseData;
-    } else if (options.toLowerCase() == "c") {
-      return await QC.findAll({
-        where: {
-          createdAt: {
-            [Op.gte]: startDate,
-            [Op.lte]: endDate,
+        });
+        return responseData;
+      } else if (options.toLowerCase() == "c") {
+        return await QC.findAll({
+          where: {
+            createdAt: {
+              [Op.gte]: startDate,
+              [Op.lte]: endDate,
+            },
+            product_set: "C",
           },
-          imeiNo: {
-            [Op.not]: null as any,
+        });
+      } else if (options.toLowerCase() == "pm") {
+        return await QC.findAll({
+          where: {
+            product_set: "PM",
+            createdAt: {
+              [Op.gte]: startDate,
+              [Op.lte]: endDate,
+            },
           },
-          rmsDeviceId: {
-            [Op.is]: null as any,
+        });
+      } else if (options.toLowerCase() == "m") {
+        return await QC.findAll({
+          where: {
+            product_set: "M",
+            createdAt: {
+              [Op.gte]: startDate,
+              [Op.lte]: endDate,
+            },
           },
-          motorCategory: {
-            [Op.is]: null as any,
-          },
-          motorType: {
-            [Op.is]: null as any,
-          },
-          motorSerialNumber: {
-            [Op.is]: null as any,
-          },
-        },
-      });
+        });
+      } else {
+        throw new APIError(" give proper option ", "INVALID OPTION");
+      }
     } else {
-      return await QC.findAll({
-        where: {
-          imeiNo: {
-            [Op.is]: null as any,
-          },
-        },
-      });
+      throw new APIError(" give proper option ", "INVALID OPTION");
     }
   } catch (error) {
     throw new APIError((error as APIError).message, (error as APIError).code);
