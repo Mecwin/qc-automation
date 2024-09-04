@@ -109,6 +109,6 @@ export enum MODEL_NUMBER {
 }
 
 export const ORDER_STATUS = {
-  ongoing: "ONGOIN",
+  ongoing: "ONGOING",
   completed: "COMPLETED",
 };

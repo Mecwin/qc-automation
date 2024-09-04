@@ -13,6 +13,13 @@ export async function embedAddRmsDetais(embedRmsDetails: embedRmsDetails) {
 
     const { imeiNo, distributorId, rmsDeviceId } = validatedEmbedAddRmsDetails;
 
+    let arrCondition = [];
+    if (imeiNo) {
+      arrCondition.push({ imeiNo: imeiNo });
+    }
+    if (rmsDeviceId) {
+      arrCondition.push({ rmsDeviceId: rmsDeviceId });
+    }
     const distributor = await Distributor.findOne({
       where: {
         id: distributorId,
@@ -25,7 +32,7 @@ export async function embedAddRmsDetais(embedRmsDetails: embedRmsDetails) {
 
     const QcFromDb = await QC.findOne({
       where: {
-        [Op.or]: [{ imeiNo }],
+        [Op.or]: arrCondition,
       },
     });
 
@@ -61,9 +68,15 @@ export async function generateRmsDeviceId(options: string, imeiNo: string) {
       order: [["createdAt", "DESC"]],
       where: {
         networkType: options.toUpperCase(),
+        rmsDeviceId: {
+          [Op.not]: null as any,
+        },
       },
     });
     console.log(autogenerate_value?.dataValues);
+
+    console.log(options);
+
     if (options.toLocaleLowerCase() == "2g") {
       let [first, second, third] = autogenerate_value?.rmsDeviceId.split(
         "-"

@@ -38,7 +38,9 @@ route.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { orderId, count } = req.query as any;
-      res.status(StatusCodes.OK).send(await updateOrderDetails(orderId, count));
+      res
+        .status(StatusCodes.OK)
+        .send(await updateOrderDetails(orderId, +count));
     } catch (error) {
       next(error);
     }

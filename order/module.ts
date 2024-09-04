@@ -53,15 +53,16 @@ export async function updateOrderDetails(orderId: string, count: number) {
       where: { orderNumber: orderId },
     });
     if (orderFromDb) {
-      if (orderFromDb.status == "COMPLETED" && count > 0) {
+      if (count > 0) {
         orderFromDb.status = "ONGOING";
-        orderFromDb.count = count;
+
+        orderFromDb.count = Number(orderFromDb.count) + count;
         const data = await orderFromDb.save();
         return {
           message: `count updated for this orderId ${orderId}`,
           data,
         };
-      } else {
+      } else if (count == 0 && orderFromDb.status == "COMPLETED") {
         return {
           message: " already count is 0  ",
         };
