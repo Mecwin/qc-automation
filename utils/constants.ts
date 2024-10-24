@@ -8,6 +8,8 @@ export const USER_ROLES: Array<string> = [
   "CONSUMER",
   "EMBED",
   "QC",
+  "CONTROLLER",
+  "MOTOR",
 ];
 
 export const MOTOR_TYPE = {
@@ -20,7 +22,7 @@ export const MOTOR_CATEGORY = {
   dc: "DC",
 };
 
-export const MOTOR_HP = [1, 2, 3, 5, 7.5, 10, 12.5, 15, 20];
+export const MOTOR_HP = [1, 2, 3, 5, 75, 10, 125, 15, 20];
 
 export const MOTOR_PURPOSE = {
   irrigation: "IRRIGATION",
@@ -111,4 +113,9 @@ export enum MODEL_NUMBER {
 export const ORDER_STATUS = {
   ongoing: "ONGOING",
   completed: "COMPLETED",
+};
+
+export const type = {
+  normal: "NORMAL",
+  pdi: "PDI",
 };

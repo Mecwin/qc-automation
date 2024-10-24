@@ -23,8 +23,8 @@ export class QC extends Model<
   InferCreationAttributes<QC>
 > {
   declare id: CreationOptional<string>;
-  declare imeiNo: CreationOptional<string>;
-  declare distributorId: ForeignKey<Distributor>;
+  declare imeiNo: CreationOptional<string | null>;
+  declare distributorId: CreationOptional<ForeignKey<Distributor>>;
   declare orderId: CreationOptional<string>;
   declare simPhoneNumber: CreationOptional<string>;
   declare simNumber: CreationOptional<string>;
@@ -62,7 +62,7 @@ const qc_Schema = {
     type: STRING,
   },
   distributorId: {
-    type: UUID,
+    type: STRING,
     references: {
       model: Distributor,
       as: "distributorId",
@@ -158,8 +158,14 @@ const qc_Schema = {
 
 QC.init(qc_Schema, { sequelize, tableName: "qc", modelName: "QC" });
 
-QC.hasOne(Distributor, {
-  foreignKey: "id",
-  sourceKey: "distributorId",
-  as: "distributor",
+QC.belongsTo(Distributor, {
+  foreignKey: "distributorId", // Foreign key in QC table
+  targetKey: "id", // Primary key in Distributor table
+  as: "distributor", // Alias for the relationship
+});
+
+QC.belongsTo(Order, {
+  foreignKey: "orderId",
+  targetKey: "id",
+  as: "order",
 });

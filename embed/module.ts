@@ -5,9 +5,28 @@ import APIError from "../utils/api-error";
 import { embedAddRmsDetaisValidation } from "./validation";
 import Distributor from "../distributor/model";
 import { Autogenerate_Value } from "../autogenerate_value/model";
+import { Order } from "../order/model";
 
-export async function embedAddRmsDetais(embedRmsDetails: embedRmsDetails) {
+export async function embedAddRmsDetais(
+  embedRmsDetails: embedRmsDetails,
+  orderId: string
+) {
   try {
+    const orderFromDb = await Order.findOne({
+      where: {
+        id: orderId,
+        embedCount: {
+          [Op.gt]: 0,
+        },
+      },
+    });
+
+    if (!orderFromDb) {
+      throw new APIError("invalid Order id ", "INVALID ORDER ID ");
+    }
+
+    console.log(orderFromDb.dataValues, " is the order came from db ");
+
     const validatedEmbedAddRmsDetails =
       await embedAddRmsDetaisValidation.validateAsync(embedRmsDetails);
 
@@ -51,6 +70,8 @@ export async function embedAddRmsDetais(embedRmsDetails: embedRmsDetails) {
     // await autogenerate_Value_fromDB?.save();
 
     const createdData = await QC.create(validatedEmbedAddRmsDetails);
+    orderFromDb.embedCount = orderFromDb.embedCount - 1;
+    await orderFromDb.save();
     return {
       message: "data successfully created  by EMBDED team",
       data: createdData,
@@ -81,7 +102,9 @@ export async function generateRmsDeviceId(options: string, imeiNo: string) {
       let [first, second, third] = autogenerate_value?.rmsDeviceId.split(
         "-"
       ) as string[];
-      third = String(Number(third) + 1);
+      console.log(third, " is the third ");
+
+      third = String(Number(third) + 1).padStart(5, "0000");
       return [first, second, third].join("-") as string;
     } else if (options.toLocaleLowerCase() == "4g") {
       return `EC200U-${imeiNo.slice(-5)}`;

@@ -12,7 +12,7 @@ import {
 } from "sequelize";
 import sequelize from "../database";
 import { BOOLEAN } from "sequelize";
-import { ORDER_STATUS } from "../utils/constants";
+import { ORDER_STATUS, type } from "../utils/constants";
 
 export class Order extends Model<
   InferAttributes<Order>,
@@ -24,6 +24,9 @@ export class Order extends Model<
   declare status: CreationOptional<string>;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
+  declare embedCount: CreationOptional<number>;
+  declare type: CreationOptional<string>;
+  declare qcCount: CreationOptional<number>;
 }
 
 const orderSchema = {
@@ -38,11 +41,25 @@ const orderSchema = {
   },
   status: {
     type: STRING,
-    isIn: [Object.values(ORDER_STATUS)],
+    // isIn: [Object.values(ORDER_STATUS)],
+    defaultValue: "ONGOING",
   },
   count: {
     type: NUMBER,
   },
+  embedCount: {
+    type: NUMBER,
+    defaultValue: 0,
+  },
+  qcCount: {
+    type: NUMBER,
+    defaultValue: 0,
+  },
+  type: {
+    type: STRING,
+    defaultValue: "NORMAL",
+  },
+
   createdAt: {
     type: DATE,
   },

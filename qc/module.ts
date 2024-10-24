@@ -16,7 +16,7 @@ export async function addRmsDetails(
       options == "PMC" ||
       options == "C" ||
       options == "PM" ||
-      options == "M"
+      options == "P"
     ) {
       const validatedData = await rmsDetailsAuth.validateAsync(rmsDetails);
       const {
@@ -28,6 +28,7 @@ export async function addRmsDetails(
         headSize,
         motorCategory,
         orderId,
+        distributorId,
       } = validatedData;
 
       // const whereClause: any = {};
@@ -47,11 +48,29 @@ export async function addRmsDetails(
       const QcFromDb = await QC.findOne({
         where: {
           [Op.or]: arrClause,
+          motorCategory,
         },
       });
 
+      console.log(QcFromDb?.dataValues);
+
       if (QcFromDb) {
         throw new APIError("duplicate properties ", "DUPLICATE INPUTS");
+      }
+
+      const order = await Order.findOne({
+        where: {
+          id: orderId,
+          qcCount: {
+            [Op.gt]: 0,
+          },
+        },
+      });
+      if (!order) {
+        throw new APIError(
+          "invlaid order Id or count is 0",
+          " INVLAID ORDER ID  OR COUNT IS 0"
+        );
       }
 
       let createdData;
@@ -68,6 +87,17 @@ export async function addRmsDetails(
           throw new APIError(
             "this IMEI is already updated ",
             " ALREADY UPDATED"
+          );
+        }
+        const distributorFromDb = await Distributor.findOne({
+          where: {
+            id: distributorId,
+          },
+        });
+        if (!distributorFromDb) {
+          throw new APIError(
+            "invlaid distributor id ",
+            "INVALID DISTRIBUTOR ID "
           );
         }
 
@@ -114,8 +144,12 @@ export async function addRmsDetails(
         dataFromDb.product_set = options;
 
         createdData = await dataFromDb.save(validatedData);
-      } else {
+      } else if (
+        options.toLowerCase() == "pm" ||
+        options.toLowerCase() == "p"
+      ) {
         validatedData.product_set = options;
+        validatedData.isUpdated = true;
         createdData = await QC.create(validatedData);
       }
       const autogenerate_Value_fromDB = await Autogenerate_Value.findOne({
@@ -132,15 +166,7 @@ export async function addRmsDetails(
         controllerSerialNumber;
       await autogenerate_Value_fromDB?.save();
 
-      const order = await Order.findOne({
-        where: {
-          id: orderId,
-        },
-      });
-
-      console.log(order?.count, " is the count ");
-      order!.count = order!.count - 1;
-      console.log(order?.count, " has been changed ");
+      order!.qcCount = order!.qcCount - 1;
       await order?.save();
 
       return {
@@ -180,57 +206,131 @@ export async function getRmsDetails(imeiNo: string) {
 export async function downloadQcDetails(
   options: string,
   date1: string,
-  date2: string
+  date2: string,
+  orderId: string
 ) {
   try {
+    const order = await Order.findOne({
+      where: {
+        id: orderId,
+      },
+    });
+
+    if (!order) {
+      throw new APIError("invalid orderId ", " INVLAID ORDER ID ");
+    }
+    console.log(order);
     let startDate = new Date(`${date1}`); //YYYY-MM-DD
     let endDate = new Date(`${date2}`); //YYYY-MM-DD
 
-    // console.log(startDate, endDate, " is the valiees ");
-    startDate = new Date(startDate.setHours(0, 0, 0, 1));
-    endDate = new Date(endDate.setHours(23, 59, 59, 59));
+    startDate.setUTCHours(0, 0, 0, 1);
+    endDate.setUTCHours(23, 59, 59, 59);
+
+    console.log(startDate, endDate);
 
     if (options) {
       if (options.toLowerCase() == "pmc") {
         const responseData = await QC.findAll({
           where: {
-            createdAt: {
+            updatedAt: {
               [Op.gte]: startDate,
               [Op.lte]: endDate,
             },
+            orderId,
+            isUpdated: true,
             product_set: "PMC",
           },
+          include: [
+            {
+              model: Distributor,
+              as: "distributor",
+              attributes: ["businessName"],
+            },
+            {
+              model: Order,
+              as: "order",
+              attributes: ["orderNumber"],
+            },
+          ],
+          order: [["updatedAt", "ASC"]],
         });
         return responseData;
       } else if (options.toLowerCase() == "c") {
         return await QC.findAll({
           where: {
-            createdAt: {
+            updatedAt: {
               [Op.gte]: startDate,
               [Op.lte]: endDate,
             },
+            orderId,
+            isUpdated: true,
             product_set: "C",
           },
+          include: [
+            {
+              model: Distributor,
+              as: "distributor",
+              attributes: ["businessName"],
+            },
+            {
+              model: Order,
+              as: "order",
+              attributes: ["orderNumber"],
+            },
+          ],
+          order: [["updatedAt", "ASC"]],
         });
       } else if (options.toLowerCase() == "pm") {
         return await QC.findAll({
           where: {
             product_set: "PM",
-            createdAt: {
+            updatedAt: {
               [Op.gte]: startDate,
               [Op.lte]: endDate,
             },
+            isUpdated: true,
+            orderId,
           },
+          include: [
+            {
+              model: Distributor,
+              as: "distributor",
+              attributes: ["businessName"],
+            },
+            {
+              model: Order,
+              as: "order",
+              attributes: ["orderNumber"],
+            },
+          ],
+          order: [["updatedAt", "ASC"]],
         });
-      } else if (options.toLowerCase() == "m") {
+      } else if (options.toLowerCase() == "p") {
         return await QC.findAll({
           where: {
-            product_set: "M",
-            createdAt: {
+            product_set: "P",
+            updatedAt: {
               [Op.gte]: startDate,
               [Op.lte]: endDate,
             },
+
+            isUpdated: true,
+
+            orderId,
           },
+          include: [
+            {
+              model: Distributor,
+              as: "distributor",
+              attributes: ["businessName"],
+            },
+            {
+              model: Order,
+              as: "order",
+              attributes: ["orderNumber"],
+            },
+          ],
+          order: [["updatedAt", "ASC"]],
         });
       } else {
         throw new APIError(" give proper option ", "INVALID OPTION");
