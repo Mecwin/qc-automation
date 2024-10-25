@@ -102,18 +102,14 @@ export async function addRmsDetails(
         }
 
         dataFromDb.controllerSerialNumber =
-          validatedData.controllerSerialNumber;
+        validatedData.controllerSerialNumber;
         dataFromDb.motorSerialNumber = validatedData.motorSerialNumber;
         dataFromDb.rmsDeviceId = validatedData.rmsDeviceId;
         dataFromDb.modelNumber = validatedData.modelNumber;
         dataFromDb.distributorId = validatedData.distributorId;
-
         dataFromDb.simOperator = validatedData.simOperator;
-
         dataFromDb.controllerRequirement = validatedData.controllerRequirement;
-
         dataFromDb.headSize = validatedData.headSize;
-
         dataFromDb.controllerBoxType = validatedData.controllerBoxType;
 
         dataFromDb.rmsRequirement = validatedData.rmsRequirement;

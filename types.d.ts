@@ -56,8 +56,8 @@ export type userType = {
   name?: string;
 };
 export type embedPDIRmsDetails = {
-  orderId:string ,
-  subOrderName: string;
+  orderId: string;
+  pdiId: string;
   distributorId: string;
   imeiNo: string;
   simPhoneNumber: string;
@@ -65,7 +65,16 @@ export type embedPDIRmsDetails = {
   simOperator: string;
   networkType: string;
   rmsDeviceId: string;
-  
 };
+export type qcpdidetails = {
+  orderId:string ;
+  pdiId :string ;
+  complitedCount:number ;
+  controllerRequirment:boolean ;
+  controllerBoxcolor :string ;
+  RmsRequirment :string ;
+  state :string ;
+  nodelAgency :string
+}
 
 export type product_set = "PMC" | "C" | "PM" | "P";

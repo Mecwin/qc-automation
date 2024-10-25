@@ -7,20 +7,29 @@ import { QC } from "../qc/model";
 import { autogenerate } from "../autogenerate_value/module";
 import { Autogenerate_Value } from "../autogenerate_value/model";
 import { table } from "console";
-import { embedPDIRmsDetails } from "../types";
-import { Op } from "sequelize";
+import { embedPDIRmsDetails, qcpdidetails } from "../types";
+import { Op, where } from "sequelize";
+import { number } from "joi";
+import app from "../app";
 
-export async function GetAllPdiOrder() {
+export async function GetAllPdiOrder(options?: any) {
   try {
+    if (options === "qc") {
+      const orders = await Order.findAll({
+        where: {
+          qcCount: {
+            [Op.gt]: 0,
+          },
+          type: "PDI",
+        },});
+      return orders;}
     const orders = await Order.findAll({ where: { type: "PDI" } });
-    if (orders.length === 0) {
-      return "No orders belong to PDI";
-    }
     return orders;
   } catch (error) {
     throw new APIError((error as APIError).message, (error as APIError).code);
   }
 }
+
 
 export async function GetPdiOrderName(orderId: string) {
   try {
@@ -57,7 +66,6 @@ export async function generate_And_BlockModelNo_PumbSLNO_ControllerSL(
     if (order) {
       order.count += orderCount;
       order.embedCount += orderCount;
-
       await order.save();
     }
     const pdi_name = await GeneratePdiName(motor_hp, head_size, orderId);
@@ -97,7 +105,8 @@ export async function generate_And_BlockModelNo_PumbSLNO_ControllerSL(
         motorType,
         controller_box_type
       );
-      const Qc_data = await QC.create({
+      const { id } = pdiRecord;
+      const Qc_data: any = await QC.create({
         motorHp: motor_hp,
         headSize: head_size,
         controllerBoxType: controller_box_type,
@@ -106,6 +115,7 @@ export async function generate_And_BlockModelNo_PumbSLNO_ControllerSL(
         motorSerialNumber: pumbslnumber,
         orderId,
         motorCategory: motor_category,
+        pdiId: id,
       });
       from_db.controllerSerialNumber = controllerserialnumber;
       from_db.modelNumber = modelNumber;
@@ -121,27 +131,14 @@ export async function generate_And_BlockModelNo_PumbSLNO_ControllerSL(
 
 export async function embeded_Assign(data: embedPDIRmsDetails) {
   try {
-    const { orderId, subOrderName } = data;
-    const pdiData = await Pdi.findOne({
-      where: {
-        orderId,
-        pdi_Name: subOrderName,
-      },
-    });
+    const { pdiId, orderId } = data;
+    const pdiData = await Pdi.findByPk(pdiId);
     if (!pdiData) {
-      throw new APIError("data not Found , somthing went wrong", "500", 500);
+      throw new APIError("Pdi order is avilebele", "400", 400);
     }
-    const { controller_box_type, motor_hp, head_size, motor_category } =
-      pdiData;
-    console.log(controller_box_type, motor_hp, head_size, motor_category);
-
     const qc: any = await QC.findOne({
       where: {
-        orderId,
-        controllerBoxType: controller_box_type,
-        motorHp: motor_hp,
-        headSize: head_size,
-        motorCategory: motor_category,
+        pdiId,
         imeiNo: { [Op.is]: null },
       },
     });
@@ -171,6 +168,51 @@ export async function embeded_Assign(data: embedPDIRmsDetails) {
   }
 }
 
-// export async function qc_Assign(data:) {
 
-// }
+export async function qc_assign(data: qcpdidetails) {
+  const { complitedCount, pdiId } = data;
+  const Pdiorder = await Pdi.findByPk(pdiId)
+  if(Pdiorder){
+    if(complitedCount >Pdiorder.qcCount){
+      throw new APIError("Completed count exceeds the allowed QC count." , "400" , 400)
+    }
+
+  }
+  let datas: any = [];
+  for (let i = 0; i < complitedCount; i++) {
+    let qc = await QC.findOne({
+      where: {
+        pdiId,
+        rmsDeviceId: { [Op.not]: null },
+        state: { [Op.is]: null },
+        controllerBoxColor: { [Op.is]: null },
+        nodalAgency: { [Op.is]: null },
+      },
+    });
+    if (qc) {
+      qc.controllerRequirement = data.controllerRequirment;
+      qc.state = data.state;
+      qc.controllerBoxColor = data.controllerBoxcolor;
+      qc.nodalAgency = data.nodelAgency;
+      qc.product_set ="PMC"
+      await qc.save();
+      datas.push(qc);} 
+    else
+    {
+      throw new APIError("qc data not found in this specified " , "400" , 400)
+    }}
+  return datas;}
+
+export async function getDistributer(pdiId: string) {
+  try {
+    const distributor = await QC.findOne({
+      where: { pdiId },
+    });
+    if (!distributor) {
+      throw new APIError("Distributer Not Found", "404", 400);
+    }
+    return distributor;
+  } catch (error) {
+    throw new APIError((error as APIError).message, (error as APIError).code);
+  }
+}
