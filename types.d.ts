@@ -56,7 +56,8 @@ export type userType = {
   name?: string;
 };
 export type embedPDIRmsDetails = {
-  orderId:string ,
+  orderId: string;
+  pdiId: string;
   subOrderName: string;
   distributorId: string;
   imeiNo: string;
@@ -65,7 +66,6 @@ export type embedPDIRmsDetails = {
   simOperator: string;
   networkType: string;
   rmsDeviceId: string;
-  
 };
 
 export type product_set = "PMC" | "C" | "PM" | "P";

@@ -8,6 +8,7 @@ import {
 } from "./module";
 import { StatusCodes } from "http-status-codes";
 import { string } from "joi";
+import { ensureQC } from "../utils/authentication";
 
 const router = Router();
 
@@ -40,6 +41,7 @@ router.get(
 
 router.post(
   "/block-pdi-orders",
+  ensureQC,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const {
@@ -50,6 +52,10 @@ router.post(
         orderCount,
         orderId,
         motorType,
+        controllerBoxColor,
+        state,
+        nodalAgency,
+        motorsize,
       } = req.body;
       const genereated = await generate_And_BlockModelNo_PumbSLNO_ControllerSL(
         motor_hp,
@@ -58,7 +64,11 @@ router.post(
         controller_box_type,
         orderCount,
         orderId,
-        motorType
+        motorType,
+        controllerBoxColor,
+        state,
+        nodalAgency,
+        motorsize
       );
       console.log(genereated);
       res.status(StatusCodes.OK).send(genereated);

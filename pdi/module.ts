@@ -40,7 +40,11 @@ export async function generate_And_BlockModelNo_PumbSLNO_ControllerSL(
   controller_box_type: string,
   orderCount: number,
   orderId: string,
-  motorType: string
+  motorType: string,
+  controllerBoxcolor: string,
+  state: string,
+  nodelAgency: string,
+  motorsize: string
 ) {
   try {
     const from_db = await Autogenerate_Value.findOne({
@@ -57,7 +61,6 @@ export async function generate_And_BlockModelNo_PumbSLNO_ControllerSL(
     if (order) {
       order.count += orderCount;
       order.embedCount += orderCount;
-
       await order.save();
     }
     const pdi_name = await GeneratePdiName(motor_hp, head_size, orderId);
@@ -97,6 +100,7 @@ export async function generate_And_BlockModelNo_PumbSLNO_ControllerSL(
         motorType,
         controller_box_type
       );
+      const { id } = pdiRecord;
       const Qc_data = await QC.create({
         motorHp: motor_hp,
         headSize: head_size,
@@ -104,8 +108,15 @@ export async function generate_And_BlockModelNo_PumbSLNO_ControllerSL(
         controllerSerialNumber: controllerserialnumber,
         modelNumber: modelNumber,
         motorSerialNumber: pumbslnumber,
+        motorType: motorType,
+        motorSize: motorsize,
         orderId,
+        pdiId: id,
         motorCategory: motor_category,
+        controllerBoxColor: controllerBoxcolor,
+        state: state,
+        nodalAgency: nodelAgency,
+        product_set: "PMC",
       });
       from_db.controllerSerialNumber = controllerserialnumber;
       from_db.modelNumber = modelNumber;
@@ -121,27 +132,14 @@ export async function generate_And_BlockModelNo_PumbSLNO_ControllerSL(
 
 export async function embeded_Assign(data: embedPDIRmsDetails) {
   try {
-    const { orderId, subOrderName } = data;
-    const pdiData = await Pdi.findOne({
-      where: {
-        orderId,
-        pdi_Name: subOrderName,
-      },
-    });
+    const { pdiId, orderId } = data;
+    const pdiData = await Pdi.findByPk(pdiId);
     if (!pdiData) {
-      throw new APIError("data not Found , somthing went wrong", "500", 500);
+      throw new APIError("Pdi order is not avilebele", "400", 400);
     }
-    const { controller_box_type, motor_hp, head_size, motor_category } =
-      pdiData;
-    console.log(controller_box_type, motor_hp, head_size, motor_category);
-
     const qc: any = await QC.findOne({
       where: {
-        orderId,
-        controllerBoxType: controller_box_type,
-        motorHp: motor_hp,
-        headSize: head_size,
-        motorCategory: motor_category,
+        pdiId,
         imeiNo: { [Op.is]: null },
       },
     });
@@ -155,22 +153,17 @@ export async function embeded_Assign(data: embedPDIRmsDetails) {
     qc.simPhoneNumber = data.simPhoneNumber;
     qc.networkType = data.networkType;
     qc.rmsDeviceId = data.rmsDeviceId;
+    qc.isUpdated = true;
     await qc.save();
     const orders = await Order.findByPk(orderId);
     if (orders) {
-      orders.qcCount += 1;
       orders.embedCount -= 1;
       await orders.save();
     }
     pdiData.embedCount -= 1;
-    pdiData.qcCount += 1;
     await pdiData.save();
     return qc;
   } catch (error) {
     throw new APIError((error as APIError).message, (error as APIError).code);
   }
 }
-
-// export async function qc_Assign(data:) {
-
-// }

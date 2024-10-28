@@ -18,8 +18,6 @@ route.get(
   }
 );
 
-route.use(ensureEmbed);
-
 route.post(
   "/register-order",
   async (req: Request, res: Response, next: NextFunction) => {
@@ -31,5 +29,6 @@ route.post(
     }
   }
 );
+route.use(ensureEmbed);
 
 export default route;

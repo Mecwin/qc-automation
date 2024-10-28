@@ -17,6 +17,7 @@ import { DOUBLE } from "sequelize";
 import { string } from "joi";
 import { BOOLEAN } from "sequelize";
 import { Order } from "../order/model";
+import Pdi from "../pdi/model";
 
 export class QC extends Model<
   InferAttributes<QC>,
@@ -33,14 +34,14 @@ export class QC extends Model<
   declare headSize: CreationOptional<string>;
   declare controllerBoxType: CreationOptional<string>;
   declare rmsRequirement: CreationOptional<boolean>;
-  declare state: CreationOptional<string>;
-  declare controllerBoxColor: CreationOptional<string>;
+  declare state: CreationOptional<string | null>;
+  declare controllerBoxColor: CreationOptional<string | null>;
   declare pumpType: CreationOptional<string>;
   declare motorSerialNumber: CreationOptional<string>;
   declare motorHp: CreationOptional<string>;
   declare motorType: CreationOptional<string>;
   declare modelNumber: CreationOptional<string>;
-  declare nodalAgency: CreationOptional<string>;
+  declare nodalAgency: CreationOptional<string | null>;
   declare motorSize: CreationOptional<string>;
   declare controllerSerialNumber: CreationOptional<string>;
   declare rmsDeviceId: CreationOptional<string>;
@@ -48,6 +49,7 @@ export class QC extends Model<
   declare isUpdated: CreationOptional<boolean>;
   declare networkType: CreationOptional<string>;
   declare createdAt: CreationOptional<Date>;
+  declare pdiId: CreationOptional<ForeignKey<Pdi | string>>;
   declare product_set: CreationOptional<string>;
   declare updatedAt: CreationOptional<Date>;
 }
@@ -78,6 +80,7 @@ const qc_Schema = {
   simPhoneNumber: {
     type: STRING,
   },
+
   simNumber: {
     type: STRING,
   },
@@ -86,6 +89,16 @@ const qc_Schema = {
     valiate: {
       isIn: [SIM_OPERATORS],
     },
+  },
+  pdiId: {
+    type: UUID,
+    references: {
+      model: Pdi, // Name of the referenced table (Pdi)
+      as: "pdiId", // Referencing the pdi_id in Pdi table
+    },
+    allowNull: true, // Allow null values
+    onUpdate: "CASCADE",
+    onDelete: "SET NULL",
   },
   controllerRequirement: {
     type: BOOLEAN,
@@ -169,3 +182,5 @@ QC.belongsTo(Order, {
   targetKey: "id",
   as: "order",
 });
+
+QC.belongsTo(Pdi, { foreignKey: "pdiId", targetKey: "id", as: "pdi" });
